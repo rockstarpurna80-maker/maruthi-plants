@@ -1,0 +1,109 @@
+{
+  "entities": {
+    "Plant": {
+      "title": "Plant",
+      "description": "Nursery plant catalog item",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "name": { "type": "string", "maxLength": 100 },
+        "scientificName": { "type": "string", "maxLength": 120 },
+        "category": { "type": "string", "maxLength": 60 },
+        "price": { "type": "number" },
+        "originalPrice": { "type": "number" },
+        "stock": { "type": "number" },
+        "inStock": { "type": "boolean" },
+        "description": { "type": "string", "maxLength": 2000 },
+        "sunlight": { "type": "string", "maxLength": 100 },
+        "watering": { "type": "string", "maxLength": 100 },
+        "soil": { "type": "string", "maxLength": 100 },
+        "size": { "type": "string", "maxLength": 80 },
+        "imageUrl": { "type": "string", "maxLength": 500000 },
+        "featured": { "type": "boolean" },
+        "bestSeller": { "type": "boolean" },
+        "createdAt": { "type": "string", "maxLength": 60 },
+        "updatedAt": { "type": "string", "maxLength": 60 }
+      },
+      "required": ["name", "category", "price", "stock", "inStock", "description", "imageUrl"]
+    },
+    "Enquiry": {
+      "title": "Enquiry",
+      "description": "Customer inquiry for plants, bulk orders or visiting guidance",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "name": { "type": "string", "maxLength": 100 },
+        "phone": { "type": "string", "maxLength": 30 },
+        "email": { "type": "string", "maxLength": 120 },
+        "message": { "type": "string", "maxLength": 2000 },
+        "plantInterest": { "type": "string", "maxLength": 120 },
+        "status": { "type": "string", "maxLength": 30 },
+        "createdAt": { "type": "string", "maxLength": 60 }
+      },
+      "required": ["name", "phone", "message", "status"]
+    },
+    "Order": {
+      "title": "Order",
+      "description": "Plant order record placed via catalog or direct booking",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "customerName": { "type": "string", "maxLength": 100 },
+        "customerPhone": { "type": "string", "maxLength": 30 },
+        "deliveryAddress": { "type": "string", "maxLength": 300 },
+        "itemsSummary": { "type": "string", "maxLength": 1000 },
+        "totalAmount": { "type": "number" },
+        "status": { "type": "string", "maxLength": 30 },
+        "createdAt": { "type": "string", "maxLength": 60 }
+      },
+      "required": ["customerName", "customerPhone", "itemsSummary", "totalAmount", "status"]
+    },
+    "Admin": {
+      "title": "Admin",
+      "description": "Admin identity and permissions",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string", "maxLength": 120 },
+        "role": { "type": "string", "maxLength": 30 },
+        "createdAt": { "type": "string", "maxLength": 60 }
+      },
+      "required": ["email", "role"]
+    },
+    "AdminLoginLog": {
+      "title": "AdminLoginLog",
+      "description": "Audit record of admin portal login attempts",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string", "maxLength": 120 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "status": { "type": "string", "maxLength": 30 },
+        "ipHint": { "type": "string", "maxLength": 120 },
+        "userAgent": { "type": "string", "maxLength": 300 },
+        "timestamp": { "type": "string", "maxLength": 60 }
+      },
+      "required": ["email", "status", "timestamp"]
+    }
+  },
+  "firestore": {
+    "/plants/{plantId}": {
+      "schema": "Plant",
+      "description": "Nursery plant inventory and catalog documents"
+    },
+    "/enquiries/{enquiryId}": {
+      "schema": "Enquiry",
+      "description": "Customer contact and plant enquiries"
+    },
+    "/orders/{orderId}": {
+      "schema": "Order",
+      "description": "Customer orders and booking requests"
+    },
+    "/admins/{adminId}": {
+      "schema": "Admin",
+      "description": "Designated administrator lookup documents"
+    },
+    "/admin_logins/{loginId}": {
+      "schema": "AdminLoginLog",
+      "description": "Audit trail tracking how many people logged in and login attempts"
+    }
+  }
+}

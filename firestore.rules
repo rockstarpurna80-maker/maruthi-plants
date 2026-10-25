@@ -1,0 +1,90 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (
+        (request.auth.token.email == 'rockstarpurna80@gmail.com' && request.auth.token.email_verified == true) ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // Global Safety Net: Default-deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Admins registry: Restricted to admins
+    match /admins/{adminId} {
+      allow read, write: if isAdmin();
+    }
+
+    // Plants catalog:
+    // Public read for customer catalog browsing and plant details
+    // Full write operations restricted to verified administrators
+    match /plants/{plantId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Customer Enquiries:
+    match /enquiries/{enquiryId} {
+      allow create: if request.resource.data.name is string &&
+                       request.resource.data.name.size() > 0 &&
+                       request.resource.data.name.size() <= 100 &&
+                       request.resource.data.phone is string &&
+                       request.resource.data.phone.size() > 0 &&
+                       request.resource.data.phone.size() <= 30 &&
+                       request.resource.data.message is string &&
+                       request.resource.data.message.size() <= 2000;
+      allow read, update, delete: if isAdmin();
+    }
+
+    // Orders:
+    match /orders/{orderId} {
+      allow create: if request.resource.data.customerName is string &&
+                       request.resource.data.customerName.size() > 0 &&
+                       request.resource.data.customerName.size() <= 100 &&
+                       request.resource.data.customerPhone is string &&
+                       request.resource.data.customerPhone.size() > 0 &&
+                       request.resource.data.customerPhone.size() <= 30 &&
+                       request.resource.data.totalAmount is number &&
+                       request.resource.data.totalAmount >= 0;
+      allow read, update, delete: if isAdmin();
+    }
+
+    // Admin Login Audit Log:
+    // Allows signed in user to log login session, only main admin can read & audit
+    match /admin_logins/{loginId} {
+      allow create: if isSignedIn();
+      allow read, update, delete: if isAdmin();
+    }
+
+    // Registered Users Directory:
+    match /users/{userId} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn() && (request.auth.uid == userId || isAdmin());
+    }
+
+    // Unified User Sessions / Login Tracking Analytics:
+    match /user_sessions/{sessionId} {
+      allow create: if isSignedIn();
+      allow read, update, delete: if isAdmin();
+    }
+
+    // Media & Photo Gallery Management:
+    match /media_gallery/{photoId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+  }
+}
+
